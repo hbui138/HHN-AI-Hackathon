@@ -1,0 +1,4 @@
+separator: ,
+enclosing: "
+Encoding: UTF-8
+Newline: CR+LF

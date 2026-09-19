@@ -1,0 +1,299 @@
+Plan 1 tí đi, đây là file content của các file json:
+
+------------
+articledata_pneumatics.csv (1 số dòng đầu):
+articleid,articlenumber,article_shortdescription,article_longdescription,manufacturer,manufacturer_articlenumber,article_note
+10661958,ES 568,"Reduzierverschr., Dichtkegel, Mutter M30x2,0 i., ES 1.4571 Ø22x12","Reduzierverschraubung, Dichtkegel, Mutter M30x2,0 i., Rohr-Außen-Ø1 22 mm, Rohr-Außen-Ø2 12 mm, PN max. 160 bar, Edelstahl 1.4571",Riegler & Co. KG,112363,
+10458940,VS 14 ABES,LANDEFELD-VERSCHLUßSTOPFEN,LANDEFELD-VERSCHLUßSTOPFEN,Landefeld Druckluft und Hydraulik GmbH,VS 14 ABES,EDELSTAHL
+10668443,437.415,"Flanschbefestigung Typ »FA« für Kompaktzyl. »ACP«, Kolben-Ø 40","Flanschbefestigung, Typ »FA« für Kompaktzylinder »ACP«, Kolben-Ø 40",Riegler & Co. KG,115852,
+10666072,"227.66-33,5","Sicherheitsventil DN 10, Messing, G 3/4 Ansprechdruck 33,5 bar","Sicherheitsventil DN 10, Messing, Betriebstemperatur -25 °C bis 180 °C, G 3/4, SW 32, Ansprechdruck 33,5 bar, baumustergeprüft",Riegler & Co. KG,104785,
+10663999,140.72-PP,"Winkel-Einschraubverschraubung, G 3/8 a., für Schlauch 6/8 mm, PP","Winkel-Einschraubverschraubung, G 3/8 a., für Schlauch 6/8 mm, Arbeitsdruck max. 10 bar (20 °C) / max. 2,5 bar (90 °C), PP",Riegler & Co. KG,110873,
+
+-------------------------------
+
+catalogdata_bearings.json (format và item đầu tiên):
+{
+  "TOTALITEMS": "4000",
+  "Items": [
+    {
+      "ITEM": {
+        "EXT_PRODUCT_ID": "10565516",
+        "LANGUAGES": [
+          {
+            "languageCode": "DE"
+          }
+        ],
+        "DESCRIPTION": [
+          {
+            "languageCode": "DE",
+            "description": "10071802 CD/P4DBA"
+          }
+        ],
+        "LONGTEXT": [
+          {
+            "languageCode": "DE",
+            "longtext": "Genauigkeits-Schraegkugellager"
+          }
+        ],
+        "MATNR": "71802 CD/P4DBA",
+        "MANUFACTNAME": "SKF",
+        "ATTRIBUTES": [
+          {
+            "languageCode": "DE",
+            "fieldName": "Reihenanzahl",
+            "fieldValue": "2",
+            "fieldUnit": ""
+          },
+          {
+            "languageCode": "DE",
+            "fieldName": "Abdichtung",
+            "fieldValue": "ohne",
+            "fieldUnit": ""
+          },
+          {
+            "languageCode": "DE",
+            "fieldName": "Innendurchmesser",
+            "fieldValue": "15.000",
+            "fieldUnit": "mm"
+          },
+          {
+            "languageCode": "DE",
+            "fieldName": "Aussendurchmesser",
+            "fieldValue": "24.000",
+            "fieldUnit": "mm"
+          },
+          {
+            "languageCode": "DE",
+            "fieldName": "Breite",
+            "fieldValue": "10.000",
+            "fieldUnit": "mm"
+          },
+          {
+            "languageCode": "DE",
+            "fieldName": "Toleranzgruppe",
+            "fieldValue": "Class 4 (P4)",
+            "fieldUnit": ""
+          },
+          {
+            "languageCode": "DE",
+            "fieldName": "Wellensitz",
+            "fieldValue": "zylindrisch",
+            "fieldUnit": ""
+          },
+          {
+            "languageCode": "DE",
+            "fieldName": "Beschichtung",
+            "fieldValue": "ohne",
+            "fieldUnit": ""
+          },
+          {
+            "languageCode": "DE",
+            "fieldName": "Berührungswinkel",
+            "fieldValue": "15.000",
+            "fieldUnit": "°"
+          },
+          {
+            "languageCode": "DE",
+            "fieldName": "Schmierstoff",
+            "fieldValue": "keine",
+            "fieldUnit": ""
+          },
+          {
+            "languageCode": "DE",
+            "fieldName": "Lagerwerkstoff",
+            "fieldValue": "Wälzlagerstahl",
+            "fieldUnit": ""
+          },
+          {
+            "languageCode": "DE",
+            "fieldName": "Axiale Lagerluft",
+            "fieldValue": "leichte Vorspannung",
+            "fieldUnit": ""
+          },
+          {
+            "languageCode": "DE",
+            "fieldName": "Lagersatz",
+            "fieldValue": "nein",
+            "fieldUnit": ""
+          },
+          {
+            "languageCode": "DE",
+            "fieldName": "Sicherungsmerkmale",
+            "fieldValue": "keine",
+            "fieldUnit": ""
+          },
+          {
+            "languageCode": "DE",
+            "fieldName": "Käfigausführung",
+            "fieldValue": "nichtmetallisch",
+            "fieldUnit": ""
+          }
+        ],
+        "ATTACHMENTS": [
+          {
+            "fileName": "https://www.boie.de/INTERSHOP/static/WFS/BOIE-BOIE_DE-Site/-/BOIE/de_DE/L/LX/NH/IY/SKF-precision-bearing-ACBB-series-D.png",
+            "mimeType": "image/png",
+            "descriptions": [
+              {
+                "languageCode": "DE",
+                "description": "Bild"
+              }
+            ]
+          }
+        ],
+        "LINK": "https://www.boie.de/INTERSHOP/web/WFS/BOIE-BOIE_DE-Site/de_DE/-/EUR/ViewParametricSearch-SimpleOfferSearch?SearchTerm=10565516"
+      }
+    },
+
+----------------------------
+catalogdata_standard_parts.json (format và item đầu tiên):
+{
+  "TOTALITEMS": "4000",
+  "Items": [
+    {
+      "ITEM": {
+        "EXT_PRODUCT_ID": "10067460",
+        "LANGUAGES": [
+          {
+            "languageCode": "DE"
+          }
+        ],
+        "DESCRIPTION": [
+          {
+            "languageCode": "DE",
+            "description": "Federnde Edelstahl-Druckstücke, mit Bolzen"
+          }
+        ],
+        "LONGTEXT": [
+          {
+            "languageCode": "DE",
+            "longtext": "Edelstahl-Druckstücke GN 616 werden zur Arretierung sowie als An- und Abdrückstifte verwendet. \r\n\r\nDer Schlitz auf der Druckbolzenseite dient zum Einschrauben in Sacklöcher. Hierzu ist unter GN 616.5 ein spezieller Schraubendreher lieferbar (siehe Tabelle)."
+          }
+        ],
+        "MATNR": "616-M4-KN",
+        "MANUFACTNAME": "Ganter",
+        "ATTRIBUTES": [
+          {
+            "languageCode": "DE",
+            "fieldName": "Form",
+            "fieldValue": "KN, Bolzen Kunststoff, normaler Federdruck",
+            "fieldUnit": ""
+          },
+          {
+            "languageCode": "DE",
+            "fieldName": "Gewinde",
+            "fieldValue": "M 4",
+            "fieldUnit": ""
+          }
+        ],
+        "ATTACHMENTS": [
+          {
+            "fileName": "https://www.boie.de/INTERSHOP/static/WFS/BOIE-BOIE_DE-Site/-/BOIE/de_DE/L/61/HN/TM/5b353809-644f-4f96-b4d3-57df1ea16328.png",
+            "mimeType": "image/jpeg",
+            "descriptions": [
+              {
+                "languageCode": "DE",
+                "description": "Bild"
+              }
+            ]
+          },
+          {
+            "fileName": "https://www.boie.de/INTERSHOP/static/WFS/BOIE-BOIE_DE-Site/-/BOIE/de_DE/L/60/LO/78/5c2687e9-87fc-474b-bd9f-548b9c348c2d.png",
+            "mimeType": "image/png",
+            "descriptions": [
+              {
+                "languageCode": "DE",
+                "description": "Bild"
+              }
+            ]
+          }
+        ]
+      }
+    },
+
+---------------------
+customerinquiry.csv (1 số dòng đầu, 3 file inquiry khác nhau cho bearings, pneuticals, standard_parts):
+
+articleid_matched,CustomerArticleDescription
+10004471,Kugellager (SKF) 6016 2Z 
+10006365,Kurvenrolle KR 47 PP-B Fabrikat: SKF  
+10567383,ZYLINDERROLLENLAGER  NJ234E 170/310X52 DIN5412
+10005543,SCHRÄGKUGELLAGER DI= 50 :SKF 7210 BECBP 
+10006114,-	Rollenlager HK0306-TV-A -	Hersteller SKF 
+10755891,DU Buchse PCM 9510060 E
+10004803,"RILLENKUGELLAGER 6204-2Z (Ina, SKF, FAG) "
+10007202,Kurvenrolle 52 X 20 NUKR 52
+10003812,"Kegelrollenlager Abmessung(mm):20x47x15,25mm DIN 720 Original-TNR:30204  Technische Daten: Innen-Ø (mm): 20 Außen-Ø (mm): 47 Breite (mm): 15.25 Breite Innenring (mm): 14 Breite Außenring (mm): 12 max. Betriebstemperatur: +150°C min. Betriebstemperatur: -40°C Dichtung: offen Ringmaterial:Wälzlagerstahl Wälzkörpermaterial:Wälzlagerstahl Käfigmaterial: Wälzlagerstahl Schmierart: geölt Magnetisch: ja Toleranz für Innen-Ø (mm): 0/-0,012 Toleranz für Außen-Ø (mm): 0/-0,014 Toleranz für Breite des Lagers (mm): 0,2/0 Toleranz für Breite Außenring (mm): 0/-0,12 Toleranz für Breite Innenring (mm): 0/-0,12"
+10005373,SPINDELLAGER GMN S6004 C TA P4+
+
+articleid_matched,CustomerArticleDescription,SupplierArticleIDInquiry,SupplierInquiry
+12030396,"CL-CS32DIN505-V SCHWER Flansch-Abdeckdichtung DIN 32676 DN32, Anschluss 2: A50,5,  Werkstoff:, Viton FPM FKM,    inkl. FDA-Konformitätserklärung erforderlich  (deutsch / englisch)",,
+12030398,"CL-CS40DIN505-V SCHWER Flansch-Abdeckdichtung DIN 32676 DN40, Anschluss 2: A50,5,  Werkstoff:, Viton FPM FKM,   inkl. FDA-Konformitätserklärung erforderlich (deutsch / englisch)",,
+12030399,"CL-CS20DIN34-V SCHWER Flansch-Abdeckdichtung,  DIN 32676 DN20, Anschluss 2: A34,  Werkstoff:, Viton FPM FKM  inkl. FDA-Konformitätserklärung erforderlich  (deutsch / englisch)",,
+10696602,"Riegler Schneckengewinde-Schlauchschelle, 10,0-16,0 mm - 158B-ES-E »blow line« (W 5) Edelstahl (W 5) 1.4401, Bandbreite 9,0 mm, Spannbereich 10,0 - 16,0 mm.",,
+10696610,"Riegler Schneckengewinde-Schlauchschelle, 16,0-25,0 mm - 158D-ES-E  »blow line« (W 5) Edelstahl (W 5) 1.4401, Bandbreite 9,0 mm, Spannbereich 16,0 - 25,0 mm. ",,
+
+articleid_matched,CustomerArticleDescription
+10072310,343.2-60-M16-80-KR
+10836442,RASTBOLZEN GN 722.6-20-30-A-SW 
+10223399,STELLFUSS M12 # 100  GN 440.5-50-M12-100-OS Werkstoff: 1.4301 
+10776764,Schutzkappe 107706764 -K1133913 (Er vermutet diese ist vom Hersteller) -10776764  -97941913  
+10189297,5334-60-B12-C
+12030328,10856703 Handrad  VDO 200 FP+I
+10498981,Gleitbuchse ( Norelem) 23730-02002320 
+
+--------------------------
+Thông tin challenge:
+Challenge 1: files in directory "catalogdata_bearings": Bearings catalog data in JSON format
+Challenge 2: files in directory "catalogdata_bearings": bearings catalog data in JSON Format
+files in directory "catalogdata_standard_parts": standard parts catalog data in JSON Format
+file in Directory "articledata_pneumatics": article data (no attributes, no media data) for pneumatic products in CSV format
+
+files in Directory "customerinquiry": customer article descriptions with assigned article-id (labeled)
+
+
+_______________________________
+
+1. Innovative (Tính Đột Phá) - Đánh gục các team "ChatGPT Wrapper"
+Rất nhiều đội sẽ chọn giải pháp gọi API OpenAI để trích xuất text. Bạn hãy biến hệ thống của mình thành một câu chuyện về "Sovereign AI" (AI tự chủ):
+
+Điểm nhấn thuyết trình: "Thay vì phụ thuộc vào một API bên ngoài đắt đỏ và rủi ro rò rỉ dữ liệu khách hàng, chúng tôi đã fine-tune một mô hình AI dành riêng cho Boie (Domain-specific AI). Nó hiểu ngôn ngữ kỹ thuật cơ khí, kết hợp với kiến trúc tìm kiếm Two-stage (Bi-encoder + Cross-encoder) chuẩn Google/Bing."
+
+Tại sao đột phá: Bạn đã giải quyết được nghịch lý: AI ngôn ngữ thường không hiểu thông số kỹ thuật khô khan.
+
+2. Feasibility (Tính Khả Thi) - Điểm cộng tuyệt đối từ CTO
+Giám khảo kỹ thuật sẽ soi tốc độ và chi phí. Hệ thống của bạn ghi điểm tuyệt đối ở đây:
+
+Siêu tốc độ (Low Latency): Nhờ cơ chế "Người gác cổng" bằng Exact Match (O(1)) và Heuristic Fuzzy Search (thu hẹp không gian tìm kiếm), hệ thống trả kết quả trong vài mili-giây, hoàn toàn đủ sức thay thế SOLR hiện tại.
+
+Chi phí vận hành bằng 0 (Zero API Cost): Toàn bộ pipeline (từ ChromaDB đến Cross-Encoder) chạy 100% offline trên server nội bộ của Boie. Không cần trả tiền API cho mỗi lần khách hàng tìm kiếm.
+
+Bảo mật: Dữ liệu đơn hàng (Inquiry) của khách không bao giờ bị gửi ra ngoài internet.
+
+3. Functionality (Chức năng hoạt động) - Demo không có góc chết
+Đừng chỉ show một đoạn terminal đen ngòm. Bạn cần code một giao diện đơn giản (bằng Streamlit hoặc Gradio) để show 2 Use Case:
+
+Tab 1 - Smart Search: Gõ 6204 2z SKF, nó hiện lên kết quả Top 1. Gõ sai chính tả 62042s, nó tự động sửa và vẫn hiện đúng đồ.
+
+Tab 2 - Auto-Matcher (Xử lý đơn hàng lô lớn): Nút Upload file CSV. Hệ thống quét 1000 dòng trong vài giây.
+
+Tính năng ăn tiền: Cột "Confidence Score" (Điểm tự tin). Dòng nào AI chắc chắn 100% -> Tô màu xanh (Auto-match). Dòng nào AI không chắc chắn (<90%) -> Tô màu vàng, đẩy vào hàng đợi kèm Top 3 gợi ý để nhân viên click chọn (Human-in-the-loop).
+
+4. Market Potential (Tiềm Năng Thị Trường) - Đánh vào bài toán kinh tế (ROI)
+Giám đốc kinh doanh sẽ thích phần này. Giải pháp của bạn mang lại tiền tươi thóc thật:
+
+Tiết kiệm chi phí vận hành (OPEX): Thay vì nhân viên sales phải ngồi căng mắt tra mã thủ công từng dòng email đặt hàng, hệ thống tự động hóa 80-90% khối lượng công việc. Nhân viên chỉ cần duyệt 10% đơn hàng lộn xộn nhất.
+
+Giảm thiểu rủi ro (Risk Mitigation): Trong B2B, giao sai một vòng bi có thể làm hỏng dây chuyền sản xuất triệu đô. Cơ chế "Ngưỡng tự tin (Threshold)" và "Xếp hạng lại bằng Cross-Encoder" đảm bảo AI không bao giờ "ảo giác" và chốt đơn sai.
+
+5. Pitching (Kỹ Năng Thuyết Trình) - Kịch bản 3 phút
+Hãy cấu trúc bài thuyết trình của team bạn như một buổi ra mắt sản phẩm thực thụ:
+
+Phút 1 (Nỗi đau & Tiềm năng): Mở đầu bằng một dòng text lộn xộn trong file CSV và hỏi: "Nhân viên Boie tốn bao lâu để tra mã này? Còn SOLR thì bó tay vì sai chính tả." -> Giới thiệu giải pháp.
+
+Phút 2 (Demo Functionality): Bật thẳng giao diện Streamlit lên, upload file test unseen_test_data.csv, cho giám khảo thấy các thanh tiến trình chạy vèo vèo và nhả ra bảng kết quả Xanh/Vàng rõ ràng.
+
+Phút 3 (Giải mã phép thuật - Innovation & Feasibility): Mở 1 slide duy nhất vẽ sơ đồ kiến trúc: Regex/Fuzzy (Fast) -> Fine-tuned Vector DB -> Cross-Encoder Rerank. Nhấn mạnh chữ "Offline", "Low-latency" và "No API Cost".
+
+Việc cần làm ngay lúc này:
+Mô hình và core engine đã có. Bạn có muốn bắt tay vào viết một file app.py bằng Streamlit để bọc engine này lại thành một giao diện web xịn xò để kịp quay video demo không?

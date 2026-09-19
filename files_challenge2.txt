@@ -1,0 +1,5 @@
+files in directory "catalogdata_bearings": bearings catalog data in JSON Format
+files in directory "catalogdata_standard_parts": standard parts catalog data in JSON Format
+file in Directory "articledata_pneumatics": article data (no attributes, no media data) for pneumatic products in CSV format
+
+files in Directory "customerinquiry": customer article descriptions with assigned article-id (labeled)
