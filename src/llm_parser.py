@@ -1,53 +1,62 @@
 import os
 import json
 from openai import OpenAI
+from dotenv import load_dotenv
+from pathlib import Path
+import pandas as pd
 
-# Initialize the client. Make sure to set your OPENAI_API_KEY environment variable.
-# For local LLMs (like LM Studio or Ollama), change the base_url.
+load_dotenv()
+
 client = OpenAI(
-    api_key=os.environ.get("OPENAI_API_KEY"),
-    # base_url="http://localhost:1234/v1" # Uncomment if using local LLM
+    base_url="https://openrouter.ai/api/v1",
+    api_key=os.environ.get("OPENROUTER_API_KEY"),
 )
 
+# 1. Load Data and Extract Whitelist ONE TIME globally to save compute
+BASE_DIR = Path(__file__).resolve().parent.parent
+master_db_path = BASE_DIR / "preprocessed_data" / "master_database.parquet"
+
+try:
+    df_master = pd.read_parquet(master_db_path)
+    # Get unique manufacturers, clean them, and sort alphabetically
+    MANUFACTURERS = sorted(list(set([str(m).strip() for m in df_master['manufacturer'].dropna() if str(m).strip()])))
+    # Create a comma-separated string of valid brands
+    VALID_BRANDS_STRING = ", ".join(MANUFACTURERS)
+except Exception as e:
+    print(f"Failed to load manufacturers: {e}")
+    VALID_BRANDS_STRING = "SKF, FAG, INA, NORELEM" # Fallback just in case
+
 def parse_query(query: str) -> dict:
-    """
-    Extracts mechanical engineering entities from a messy user query.
-    Returns a normalized JSON dictionary.
-    """
     prompt = f"""
-    You are an expert mechanical engineering assistant.
-    Extract the following information from the user query.
-    Return ONLY a valid JSON object with these exact keys:
-    - "Manufacturer": The brand or manufacturer name (e.g., SKF, FAG, Landefeld). If none, null.
-    - "Part_Number": The alphanumeric part code (e.g., 6204-2Z, KR47PPB). Strip out filler words. If none, null.
-    - "Attributes": Any other technical specifications (e.g., size, material). If none, null.
+    You are an expert data extractor for a mechanical engineering B2B distributor.
+    Extract information from the user query into a strict JSON object with keys: "Manufacturer", "Part_Number", "Attributes".
+    
+    RULES:
+    1. "Manufacturer": MUST be one of the brands from this exact valid list: [{VALID_BRANDS_STRING}]. 
+       If the text contains words like 'Edelstahl' (Stainless steel), 'Rastbolzen' (Plunger), or 'Kugellager' (Bearing), DO NOT classify them as manufacturers. If no brand from the list is present, return null.
+    2. "Part_Number": The alphanumeric part code (e.g., 6204-2Z, 06090-05x10). If none, return null.
+    3. "Attributes": Any other technical specifications (dimensions, materials, etc.). Return as a single string. If none, return null.
     
     User query: "{query}"
     """
     
     try:
         response = client.chat.completions.create(
-            model="gpt-4o-mini", # Extremely fast and capable of JSON formatting
+            model="openai/gpt-4o-mini",
             messages=[
                 {"role": "system", "content": "You output strict JSON."},
                 {"role": "user", "content": prompt}
             ],
             response_format={ "type": "json_object" },
-            temperature=0.1 # Keep it low for deterministic extraction
+            temperature=0.0 # Set to 0.0 for maximum strictness in constrained extraction
         )
         
-        # Parse the string response into a Python dictionary
         extracted_data = json.loads(response.choices[0].message.content)
         return extracted_data
         
     except Exception as e:
         print(f"LLM Parsing failed: {e}")
-        # Fallback dictionary in case of API failure or timeout
-        return {
-            "Manufacturer": None,
-            "Part_Number": None,
-            "Attributes": None
-        }
+        return {"Manufacturer": None, "Part_Number": None, "Attributes": None}
 
 # Quick test execution
 if __name__ == "__main__":
@@ -55,7 +64,7 @@ if __name__ == "__main__":
         "Kugellager (SKF) 6016 2Z",
         "Kurvenrolle KR 47 PP-B Fabrikat: SKF",
         "suche ein Rillenkugellager von FAG, nummer 6204 mit gummidichtung",
-        "Lager 1313 K/C3 + Spannhülse"
+        "Anschlagschraube GN 251-M4-20-AK    Ganter"
     ]
     
     for q in test_queries:
