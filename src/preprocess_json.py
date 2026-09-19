@@ -63,7 +63,8 @@ def main():
     
     # Define input and output directories
     # Update 'raw_data_folder' to match the actual name of your unzipped folder
-    input_dir = base_dir / "catalogdata_standard_parts"  # Replace with the actual folder name
+    # input_dir = base_dir / "catalogdata_standard_parts" 
+    input_dir = base_dir / "articledata_pneumatics/catalogdata_standard_parts/" # Replace with the actual folder name
     output_dir = base_dir / "preprocessed_data/standard_parts"
     
     # Create output directory if it does not exist
