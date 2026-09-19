@@ -14,11 +14,12 @@ def process_pneumatics_csv(input_csv, output_json):
     
     # Iterate through each row in the dataframe
     for _, row in df.iterrows():
-        # Extract basic information and convert to string
-        ext_id = str(row.get('articleid', ''))
-        manufacturer = str(row.get('manufacturer', ''))
-        part_number = str(row.get('manufacturer_articlenumber', ''))
-        article_number = str(row.get('articlenumber', ''))
+        # Extract basic information and convert to string (pandas NaN -> '')
+        clean = lambda v: '' if pd.isna(v) else str(v)
+        ext_id = clean(row.get('articleid', ''))
+        manufacturer = clean(row.get('manufacturer', ''))
+        part_number = clean(row.get('manufacturer_articlenumber', ''))
+        article_number = clean(row.get('articlenumber', ''))
         
         # Extract text fields
         short_desc = str(row.get('article_shortdescription', ''))
@@ -43,7 +44,12 @@ def process_pneumatics_csv(input_csv, output_json):
             "manufacturer": manufacturer,
             "article_number": article_number, # Included in output
             "part_number": part_number,
-            "combined_text": combined_text
+            "combined_text": combined_text,
+            "description": clean(row.get('article_shortdescription', '')),
+            "longtext": clean(row.get('article_longdescription', '')),
+            "attributes": [{"name": "Hinweis", "value": clean(row.get('article_note', '')), "unit": ""}] if clean(row.get('article_note', '')) else [],
+            "images": [],  # the pneumatics CSV has no media data
+            "link": ""
         })
             
     # Save the processed data into a JSON file

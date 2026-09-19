@@ -26,7 +26,27 @@ except Exception as e:
     print(f"Failed to load manufacturers: {e}")
     VALID_BRANDS_STRING = "SKF, FAG, INA, NORELEM" # Fallback just in case
 
+# Persistent cache: identical queries are never sent to the API twice (cheaper, and makes
+# evaluation runs reproducible so scoring changes can be compared fairly)
+CACHE_PATH = BASE_DIR / "preprocessed_data" / "llm_parse_cache.json"
+try:
+    with open(CACHE_PATH, "r", encoding="utf-8") as f:
+        _parse_cache = json.load(f)
+except (FileNotFoundError, json.JSONDecodeError):
+    _parse_cache = {}
+
 def parse_query(query: str) -> dict:
+    if query in _parse_cache:
+        return dict(_parse_cache[query])
+    result = _parse_query_llm(query)
+    # Only cache successful parses so transient API errors are retried next run
+    if not result.get("_error"):
+        _parse_cache[query] = result
+        with open(CACHE_PATH, "w", encoding="utf-8") as f:
+            json.dump(_parse_cache, f, ensure_ascii=False, indent=1)
+    return {k: v for k, v in result.items() if k != "_error"}
+
+def _parse_query_llm(query: str) -> dict:
     prompt = f"""
     You are an expert data extractor for a mechanical engineering B2B distributor.
     Extract information from the user query into a strict JSON object with keys: "Manufacturer", "Part_Number", "Attributes".
@@ -56,7 +76,7 @@ def parse_query(query: str) -> dict:
         
     except Exception as e:
         print(f"LLM Parsing failed: {e}")
-        return {"Manufacturer": None, "Part_Number": None, "Attributes": None}
+        return {"Manufacturer": None, "Part_Number": None, "Attributes": None, "_error": True}
 
 # Quick test execution
 if __name__ == "__main__":
