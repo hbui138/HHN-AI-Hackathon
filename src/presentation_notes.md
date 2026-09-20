@@ -180,4 +180,6 @@ Routing:  Top-1 ≥ 0.90 và cách Top-2 ≥ 0.02  →  🟢 Tự động chốt
 2.  Đo latency / query (có cache và không cache).
 3.  Chạy lại các ca demo ở mục 8.
 4.  UI (Streamlit): bảng xanh/vàng, ảnh sản phẩm, cột "lý do" từ trường `method` + `attribute_rules_fired` trong file kết quả JSON.
+5. Tính ROI (Có thể thêm 1 giao diện tính ROI để bên công ty nhập số liệu). Viết sẵn công thức và giả định để 
+present
 5.  (Tuỳ chọn) Ablation luật viết tay → một dòng trên slide: "bỏ hết luật viết tay chỉ mất X điểm".
