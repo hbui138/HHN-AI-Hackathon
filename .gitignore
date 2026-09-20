@@ -5,6 +5,14 @@ chroma_db/
 models/
 *.csv
 
+# Raw catalog downloads (zips + extracted json), kept out of the repo
+catalogdata_bearings/
+catalogdata_standard_parts/
+articledata_pneumatics/
+customerinquiry/
+preprocessed_data/
+.DS_Store
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
