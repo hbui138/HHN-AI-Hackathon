@@ -240,7 +240,7 @@ def generate_code_candidates(original_query, raw_part_number=None, expected_cate
     apply_article_id_evidence(candidate_pool, original_query)
     return candidate_pool
 
-def hybrid_search(original_query, parsed_data, expected_category=None):
+def hybrid_search(original_query, parsed_data, expected_category=None, top_k=3):
     brand = parsed_data.get("Manufacturer")
     candidate_pool = generate_code_candidates(original_query, parsed_data.get("Part_Number"), expected_category)
 
@@ -325,4 +325,4 @@ def hybrid_search(original_query, parsed_data, expected_category=None):
         })
 
     final_results = sorted(final_results, key=lambda x: x['confidence'], reverse=True)
-    return final_results[:3]
+    return final_results[:top_k]

@@ -1,8 +1,9 @@
 # 🚀 Project Status & Technical Challenges: AI-Driven Product Matching (Boie)
 
-> **Trạng thái hiện tại (2026-09-19, 200 mẫu test chưa từng train — seed 42 + seed 2026):**
-> Top-1 **72–76%** · Top-3 **79–81%** · Tự động hóa **62–65%** · Auto-match đúng nhãn **92%** (117/127; ≈ **95%** nếu tính cả biến thể khách không chỉ định — kiểm tra tay, Mục 5.3)
-> (Baseline ban đầu: Top-1 40%, Top-3 49%, precision ~70%.) Ghi chú cho thuyết trình: `presentation_notes.md`.
+> **Trạng thái hiện tại (2026-09-20, 2.000 query test chưa từng train — 1.000 mẫu × seed 42 + seed 2026):**
+> Top-1 **76.0%** · Top-3 **81.8%** · Tự động hóa **59.2%** · Auto-match đúng nhãn **95.4%** (sai 54/1.185)
+> Phân loại lỗi tự động: 59% biến thể khách để ngỏ · 15% biến thể khách có ghi rõ · 26% sản phẩm khác.
+> (Baseline ban đầu: Top-1 40%, Top-3 49%, precision ~70%.) Báo cáo đầy đủ: `results/evaluation_summary.md` · Ghi chú thuyết trình: `presentation_notes.md`.
 
 ## 1. Bối cảnh & Mục tiêu dự án (Context & Objectives)
 **Nhiệm vụ cốt lõi:** *From description to article* - Khách hàng đặt hàng hoặc yêu cầu báo giá bằng các đoạn text tự do (free-text) chứa mã phụ tùng, tên hãng và các thuộc tính. AI cần nhận diện và đối chiếu chính xác với cơ sở dữ liệu để tạo ra một danh sách kết quả được xếp hạng theo độ liên quan (relevance-ranked list).
@@ -93,6 +94,7 @@ Hệ thống không cố gắng thay thế con người 100% (rất dễ gây h�
 | ↳ Chống overfit: **seed 2026** (100 mẫu khác) | 75% | 81% | 64% | 93.8% |
 | + Luật thuộc tính học từ dữ liệu — seed 42 / 2026 | 71% / 75% | 78% / 81% | 61% / 65% | 90.2% / 92.3% |
 | Lần chạy `20260919_202234` / `_201912` (phiên song song) — seed 42 / 2026 | 70% / 73% | 77% / 80% | 62% / 64% | 88.7% / 93.8% |
+| **1.000 mẫu** — seed 42 / seed 2026 | **74.3% / 77.7%** | **81.1% / 82.4%** | **58.1% / 60.4%** | **95.0% / 95.9%** |
 | **+ Tra mã hàng Boie trong câu khách** (`20260919_204920` / `_204556`) — seed 42 / 2026 | **72% / 76%** | **79% / 81%** | **62% / 65%** | **90.3% / 93.8%** |
 
 **Tra mã hàng Boie:** số 6–10 chữ số đứng riêng trong câu mà trùng đúng một mã hàng trong catalog → `S_code = 1.0`, mọi ứng viên khác bị giới hạn 0.90. Sửa được `6010 2Z / 10004423` (→ `6010-2Z/C3`) và `3206-BD-XL-2HRS-TVH / 10003946` (mã FAG + mã hàng Boie → đúng hàng SKF). Lỗi `W 6001-2RS1` ở lần chạy song song **không tái hiện** với code hiện tại.
@@ -148,6 +150,8 @@ Hệ thống không cố gắng thay thế con người 100% (rất dễ gây h�
 | `build_crossref.py` (mới) | Học Norelem → Kipp series + brand model từ tập train |
 | `attribute_rules.py` (mới) | Học luật "từ trong query → thuộc tính sản phẩm" (đối chứng với biến thể, lift so với baseline, cận dưới Wilson) |
 | `feature_flags.py` (mới) | Bật/tắt từng luật viết tay để đo ablation |
+| `summarize_results.py` (mới) | Kết quả JSON → báo cáo markdown: chỉ số, theo nhóm hàng, bảng đánh đổi, **tự phân loại lỗi** |
+| `app.py` (mới) | UI Streamlit 4 tab: **Order automation** (UC1 — lấy ngẫu nhiên n dòng test *ngoài* 1.000 dòng của lần đánh giá seed 2026, chạy trực tiếp, bảng quyết định + tỷ lệ tự động, đẩy dòng không chắc sang nhân viên), **Shop search** (UC2 — khớp real-time khi khách gõ, `streamlit-keyup`, nút gửi inquiry), **Clerk inbox** (phân biệt nguồn shop / mail; xanh: khớp rõ → Accept · cam: Top-3 → mở rộng Top-10 · xám: chỉ liên quan; luôn cho nhập mã tay), **Results** (2.000 query đã đánh giá). Quyết định ghi vào `results/clerk_decisions.jsonl` |
 | `search_engine.py` | `generate_code_candidates()`; công thức mới; brand model; `S_attr`; CE dùng `hãng + mã + text`; bearing alias bỏ tiền tố chữ (`W 61802` ← `61802`, trừ 0.1) |
 | `llm_parser.py` | Cache kết quả parse (`llm_parse_cache.json`) |
 | `create_database.py` | Dict `code → [ids]` + alias không tiền tố; bỏ mã `nan`; lưu thông tin sản phẩm đầy đủ; `--dict-only` / `--skip-vectors` |
@@ -170,7 +174,34 @@ python run_pipeline.py 100 --seed 2026     # -> results/pipeline_results_<timest
 ABLATE=suffix_equivalents python run_pipeline.py 100   # tắt 1 luật viết tay để so sánh
 ```
 
-### 5.6 Việc tiếp theo
+### 5.6 Đánh giá 2.000 query (chốt số, 2026-09-20)
+
+Sinh bằng `python summarize_results.py` → `results/evaluation_summary.md`.
+
+| Nhóm | n | Top-1 | Top-3 | Tự động hóa | Auto-match đúng nhãn |
+|---|---|---|---|---|---|
+| bearings | 702 | 78.6% | 86.9% | 60.4% | 92.0% |
+| standard_parts | 1.136 | 76.1% | 79.8% | 58.9% | **98.1%** |
+| pneumatics | 162 | 64.2% | 72.8% | 56.8% | 92.4% |
+
+**Phân loại 54 ca auto-match sai (máy tự phân loại theo mã, không xem tay):** 32 ca (59%) cùng sản phẩm, biến thể khách để ngỏ; 8 ca (15%) cùng sản phẩm nhưng khách **có** ghi chi tiết (`C3`, `NR`, inox); 14 ca (26%) sản phẩm khác. Lưu ý: "cùng sản phẩm" không đồng nghĩa "chấp nhận được" (giao bản inox khi khách không yêu cầu vẫn là sai), nên 98.1% chỉ là cận trên.
+
+**Đánh đổi (2.000 query):**
+
+| Threshold | Delta | Tự động hóa | Đúng nhãn |
+|---|---|---|---|
+| 0.80 | 0.02 | 68.3% | 93.6% |
+| **0.90** | **0.02** | **59.2%** | **95.4%** |
+| 0.94 | 0.05 | 39.1% | 97.8% |
+| 0.96 | 0.05 | 36.2% | 98.1% |
+
+Manual Review: 815 dòng, đáp án nằm trong Top-3 ở **59%** (trước đây 51%).
+
+**Quy tắc quan trọng trong UI:** inquiry đến từ **shop** (khách đã xem gợi ý và vẫn bấm gửi) **không bao giờ được tô xanh** — lựa chọn của khách là bằng chứng phủ định mạnh hơn điểm của model; các mã khách đã thấy được đánh dấu "customer saw this". Inquiry đến từ **mail/CSV** (khách chưa thấy gợi ý nào) vẫn được tự động chốt như bình thường.
+
+**Latency** (laptop CPU, đo 2026-09-20): tìm kiếm **0.4–1.5 s/query** cho top-10; LLM parser thêm 0.7–1.8 s nếu chưa cache; nạp model 1 lần ~60 s.
+
+### 5.7 Việc tiếp theo
 1.  ✅ **Ổn định code:** đã xong (2026-09-20) — `detect_supplier_prefixes` / `SUPPLIER_PREFIX_PATH` đã được viết trong `normalization.py`, pipeline chạy thông tới `build_crossref.py`. Chi tiết ở 5.7.
 2.  **Ablation** từng luật viết tay (2 seed, không tốn API vì đã cache) → biết luật nào đáng giữ / chuyển sang cấu hình.
 3.  **Đánh giá có mục tiêu cho luật thuộc tính:** chỉ các query có từ khớp luật, bật/tắt `S_attr`.

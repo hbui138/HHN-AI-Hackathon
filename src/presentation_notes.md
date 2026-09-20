@@ -1,12 +1,12 @@
 # 🎤 Presentation Notes — Boie AI Product Matching
 
-> Ghi chú để làm slide và thuyết trình. Số liệu lấy từ 200 query **test chưa từng dùng để train** (seed 42 + seed 2026, 100 mẫu mỗi seed), lần chạy ngày 2026-09-19. Trước khi lên slide: chạy lại 1000 mẫu để chốt số (xem "Việc cần làm trước demo").
+> Ghi chú để làm slide và thuyết trình. Số liệu **đã chốt** trên 2.000 query test chưa từng dùng để train (1.000 mẫu × seed 42 + seed 2026), chạy ngày 2026-09-20. Báo cáo gốc: `results/evaluation_summary.md` (sinh bằng `python summarize_results.py`).
 
 ---
 
 ## 1. Thông điệp chính (1 câu)
 
-> **"Chúng tôi biến 25.000 đơn hàng Boie đã xử lý thành một hệ thống tự động chốt ~60% yêu cầu báo giá với độ chính xác ~91% (≈94% nếu tính biến thể tương đương khách không chỉ định) — phần còn lại chuyển cho nhân viên kèm Top-3 gợi ý."**
+> **"Chúng tôi biến 25.000 đơn hàng Boie đã xử lý thành một hệ thống tự động chốt ~60% yêu cầu báo giá với độ chính xác 95% — phần còn lại chuyển cho nhân viên kèm Top-3 gợi ý và ảnh sản phẩm."**
 
 Ba từ khóa lặp lại xuyên suốt: **Học từ lịch sử đơn hàng của Boie** · **Giải thích được từng quyết định** · **Con người quyết định khi AI không chắc**.
 
@@ -31,27 +31,34 @@ Ba từ khóa lặp lại xuyên suốt: **Học từ lịch sử đơn hàng c�
 
 ## 3. Số liệu cho slide
 
-### 3.1 Trước / sau (cùng 100 mẫu test)
+### 3.1 Trước / sau (2.000 query test)
 
 | | Baseline | Hiện tại |
 |---|---|---|
-| Top-1 (đúng ngay kết quả đầu) | 40% | **70–75%** |
-| Top-3 (đáp án nằm trong 3 gợi ý) | 49% | **77–81%** |
-| Tự động hóa | ~18% | **~62–64%** |
-| Auto-match đúng nhãn | ~70% | **~89–94%** |
-| Auto-match đúng nhãn **hoặc biến thể tương đương khách không chỉ định** (kiểm tra tay) | – | **≈ 94%** |
+| Top-1 (đúng ngay kết quả đầu) | 40% | **76.0%** |
+| Top-3 (đáp án nằm trong 3 gợi ý) | 49% | **81.8%** |
+| Tự động hóa | ~18% | **59.2%** |
+| Auto-match đúng nhãn | ~70% | **95.4%** |
 
 Biểu đồ gợi ý: cột Top-1 qua từng giai đoạn (bảng 5.1 trong `challenge2.md`) — kể câu chuyện "mỗi bước sửa một nguyên nhân gốc".
 
-### 3.2 Theo nhóm hàng (200 mẫu)
+### 3.2 Theo nhóm hàng (2.000 query)
 
 | Nhóm | n | Top-1 | Top-3 | Tự động hóa | Auto-match đúng nhãn |
 |---|---|---|---|---|---|
-| Standard parts (Kipp, Ganter) | 118 | 75% | 79% | 64% | **96%** |
-| Bearings (SKF) | 68 | 66% | 79% | 60% | 83% |
-| Pneumatics | 14 | 64% | 71% | 71% | 90% (n nhỏ) |
+| Standard parts (Kipp, Ganter) | 1.136 | 76.1% | 79.8% | 58.9% | **98.1%** |
+| Bearings (SKF) | 702 | 78.6% | 86.9% | 60.4% | 92.0% |
+| Pneumatics | 162 | 64.2% | 72.8% | 56.8% | 92.4% |
 
-→ Bearings thấp hơn vì rất nhiều biến thể gần giống nhau (`6007-2Z` / `6007-2Z/C3`), và hệ thống còn bỏ sót chi tiết khách **có** ghi (`C3`, `NR`, mã hàng Boie) — xem `challenge2.md` Mục 5.3.
+### 3.3 Lỗi thuộc loại gì (máy tự phân loại 54 ca tự chốt sai)
+
+| Loại | Số ca | Tỷ lệ |
+|---|---|---|
+| Cùng sản phẩm, biến thể khách để ngỏ | 32 | 59% |
+| Cùng sản phẩm, khách **có** ghi chi tiết (`C3`, `NR`, inox) | 8 | 15% |
+| Sản phẩm khác | 14 | 26% |
+
+→ Nói được: "3/4 số ca sai vẫn là đúng sản phẩm, chỉ khác biến thể." Đừng nói "đều do khách mô tả mơ hồ" — 15% là lỗi của hệ thống.
 
 ---
 
@@ -59,13 +66,13 @@ Biểu đồ gợi ý: cột Top-1 qua từng giai đoạn (bảng 5.1 trong `ch
 
 | Threshold | Delta | Tự động hóa | Đúng nhãn |
 |---|---|---|---|
-| 0.80 | 0.02 | 70% | 92% |
-| **0.90** | **0.02** | **63%** | **91%** ← mặc định |
-| 0.90 | 0.05 | 48% | 95% |
-| 0.94 | 0.05 | 44% | 95% |
+| 0.80 | 0.02 | 68.3% | 93.6% |
+| **0.90** | **0.02** | **59.2%** | **95.4%** ← mặc định |
+| 0.94 | 0.05 | 39.1% | 97.8% |
+| 0.96 | 0.05 | 36.2% | 98.1% |
 
 **Cách kể:**
-*   "Tự động hóa và độ an toàn là **một núm vặn**, không phải con số cố định. Boie chọn: muốn an toàn tối đa → 44% tự động, 95% đúng nhãn; muốn năng suất → 70% tự động."
+*   "Tự động hóa và độ an toàn là **một núm vặn**. An toàn tối đa → 36% tự động với 98% đúng; mặc định → 59% với 95%; năng suất → 68% với 94%. Boie chọn."
 *   "Khoảng một nửa số ca 'sai' là biến thể khách không chỉ định: khách ghi `6007 2Z`, chúng tôi giao `6007-2Z`, nhân viên lúc đó chọn `6007-2Z/C3`." (Đừng dùng ví dụ `6010 2Z` — khách đã ghi kèm mã hàng Boie của bản `/C3`, đó là lỗi thật.)
 *   Nhận xét của Boie: sản phẩm tương đương đúng yêu cầu khách là chấp nhận được.
 
@@ -123,12 +130,14 @@ Routing:  Top-1 ≥ 0.90 và cách Top-2 ≥ 0.02  →  🟢 Tự động chốt
 *   "Mã sai định dạng, mã của đối thủ, tên hãng khác hàng Boie bán. SOLR không tìm ra. Nhân viên phải tra tay từng dòng."
 
 **Phút 2 — Demo**
-*   Upload file → bảng xanh/vàng. Click một dòng xanh: hiện sản phẩm + ảnh + **lý do** (mã khớp, hãng học được, thuộc tính khớp).
+*   Tab **Order automation**: bấm "Run a fresh batch" → 25 dòng inquiry mới chạy ngay trên sân khấu (~1 phút), ra bảng xanh/vàng kèm tỷ lệ tự động và "có khớp lựa chọn của nhân viên không".
+*   Tab **Shop search**: gõ tới đâu khớp tới đó; nếu không vừa ý, bấm gửi inquiry.
+*   Tab **Clerk inbox**: dòng vàng kèm Top-3, ảnh và **lý do**; mở rộng tới Top-10; hoặc nhập mã tay. Dòng đến từ shop ghi rõ "khách đã xem các gợi ý này".
 *   Click một dòng vàng: Top-3 kèm ảnh, nhân viên chọn 1 click.
 *   Chuyển tab Shop Search: gõ mã Norelem → ra hàng Kipp.
 
 **Phút 3 — Vì sao tin được**
-*   Slide trade-off: "~60% tự động với ~91% đúng nhãn, hoặc ~45% tự động với ~95%; Boie tự chọn mức an toàn."
+*   Slide trade-off: "59% tự động với 95% đúng nhãn, hoặc 36% tự động với 98%; Boie tự chọn mức an toàn."
 *   Slide "học từ lịch sử đơn": FAG→SKF, Norelem→Kipp, VA→inox — tri thức riêng của Boie mà ChatGPT không có.
 *   Chốt: "Mỗi lựa chọn của nhân viên ở màn Manual Review trở thành dữ liệu học → hệ thống càng dùng càng giỏi."
 
@@ -156,12 +165,12 @@ Routing:  Top-1 ≥ 0.90 và cách Top-2 ≥ 0.02  →  🟢 Tự động chốt
 
 | Câu hỏi có thể gặp | Trả lời |
 |---|---|
-| "90% đúng là đủ cho B2B chưa? 10% giao sai rất đắt." | Khoảng một nửa số ca "sai" là biến thể tương đương khách không chỉ định (≈94% tính theo tiêu chí này, kiểm tra tay). Và ngưỡng là núm vặn: 95% đúng nhãn ở 44–48% tự động. Boie chọn. |
+| "95% đúng là đủ cho B2B chưa?" | 3/4 số ca sai vẫn là đúng sản phẩm, chỉ khác biến thể, và báo giá luôn kèm phương án thay thế. Ngưỡng là núm vặn: 98% đúng ở mức 36% tự động. Boie chọn điểm vận hành. |
 | "Đây có phải chỉ là rule hard-code?" | Tri thức chính (hãng thay thế, Norelem→Kipp, thuật ngữ vật liệu) **học từ 25.000 đơn**, sinh lại tự động khi có đơn mới. Một lớp nhỏ luật ngành (hậu tố vòng bi, DIN/ISO) được giữ tường minh, dễ kiểm tra, sẽ chuyển ra file cấu hình cho chuyên gia Boie — như `synonyms.txt` của SOLR nhưng nhỏ hơn nhiều. |
-| "Có overfit không?" | Tách train/test cố định; mọi bảng học chỉ dùng tập train; kiểm tra trên 2 bộ 100 mẫu khác nhau (seed 42 / 2026, trùng 1 dòng) — kết quả tương đương. |
+| "Có overfit không?" | Tách train/test cố định; mọi bảng học chỉ dùng tập train; kiểm tra trên 2 bộ 1.000 mẫu khác nhau (seed 42 / 2026): Top-1 74.3% và 77.7%. |
 | "Sao không dùng ChatGPT cho tất cả?" | GPT không biết Boie giao SKF thay FAG hay Norelem 02041 = Kipp K0299. Tri thức đó nằm trong lịch sử đơn của Boie. LLM chỉ dùng để trích Hãng/Mã, có cache → chi phí gần 0 và có thể thay bằng model chạy nội bộ. |
 | "Bảo trì thế nào?" | Chạy lại `build_crossref.py` + `attribute_rules.py` định kỳ (vài phút). Lựa chọn của nhân viên ở Manual Review = nhãn mới → vòng lặp tự cải thiện. |
-| "Latency?" | ⚠️ Chưa đo chính thức — đo trước demo (ước lượng: dưới 1 giây/query khi LLM đã cache). |
+| "Latency?" | Đo trên laptop CPU: tìm kiếm **0.4–1.5 giây/query** (top-10). LLM parser thêm 0.7–1.8 giây nếu chưa cache, 0 giây nếu đã cache. Nạp model 1 lần khi khởi động ~60 giây. So với tra tay vài phút mỗi dòng. |
 | "Query chỉ có mô tả, không có mã?" | Điểm yếu thừa nhận: đi qua vector search + thuộc tính, confidence thấp hơn → thường vào Manual Review (đúng thiết kế). |
 
 ---
@@ -179,5 +188,5 @@ Routing:  Top-1 ≥ 0.90 và cách Top-2 ≥ 0.02  →  🟢 Tự động chốt
 1.  Ổn định code (đang có sửa đổi song song), chạy lại 1000 mẫu → cập nhật mọi con số ở mục 3–4.
 2.  Đo latency / query (có cache và không cache).
 3.  Chạy lại các ca demo ở mục 8.
-4.  UI (Streamlit): bảng xanh/vàng, ảnh sản phẩm, cột "lý do" từ trường `method` + `attribute_rules_fired` trong file kết quả JSON.
+4.  ~~UI (Streamlit)~~ ✅ `app.py` có 4 tab: **Order automation** (UC1 — chạy trực tiếp một lô inquiry mới, ngoài 1.000 dòng đã đánh giá), **Results** (số liệu + từng inquiry đã chạy), **Shop search** (khách gõ tới đâu khớp tới đó, nút "Send as inquiry" khi không vừa ý), **Clerk inbox** (nhân viên nhận inquiry: xanh = khớp rõ → Accept; cam = nằm trong Top-3 → xem tiếp tới Top-10; xám = chỉ hiển thị liên quan; luôn có ô nhập mã tay). Quyết định lưu vào `results/clerk_decisions.jsonl` = nhãn train mới.
 5.  (Tuỳ chọn) Ablation luật viết tay → một dòng trên slide: "bỏ hết luật viết tay chỉ mất X điểm".
