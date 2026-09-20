@@ -132,8 +132,9 @@ Hệ thống không cố gắng thay thế con người 100% (rất dễ gây h�
 | Loại | Thành phần |
 |---|---|
 | ✅ Học từ dữ liệu train | Luật thuộc tính (`attribute_rules.json`), brand model (`brand_model.json`), series Norelem → Kipp (`norelem_kipp_series.json`), model vector fine-tune |
+| ✅ Học từ catalog | **Tiền tố nhà cung cấp** (`supplier_prefixes.json`) — mới chuyển từ luật viết tay sang, xem 5.7 |
 | ⚙️ Tham số thống kê | Trọng số, Threshold/Delta, ngưỡng Wilson/lift; bỏ thuộc tính dạng số |
-| ⚠️ Luật viết tay | Hậu tố vòng bi tương đương, `69xx = 619xx`, tiền tố nhà cung cấp (FAG 202…), regex `VA → edelstahl` / `M5x12`, danh sách hãng đối thủ, `DIN/ISO`, mẫu mã Norelem |
+| ⚠️ Luật viết tay | Hậu tố vòng bi tương đương, `69xx = 619xx`, regex `VA → edelstahl` / `M5x12`, danh sách hãng đối thủ, `DIN/ISO`, mẫu mã Norelem |
 
 *   Quan điểm team: **luật viết tay chấp nhận được nếu mở rộng được** → hướng đi: chuyển ra file cấu hình (`domain_rules.json`) để chuyên gia Boie tự bổ sung, giống `synonyms.txt` của SOLR.
 *   Cơ chế đo giá trị từng luật: `feature_flags.py`, bật/tắt bằng biến môi trường `ABLATE=supplier_prefix,suffix_equivalents,...` (**chưa chạy ablation** — xem 5.6).
@@ -142,7 +143,7 @@ Hệ thống không cố gắng thay thế con người 100% (rất dễ gây h�
 
 | File | Nội dung |
 |---|---|
-| `normalization.py` (mới) | `normalize_code`, `normalize_category`, `strip_supplier_prefix` — dùng chung cho build DB và search |
+| `normalization.py` (mới) | `normalize_code`, `normalize_category`, `strip_supplier_prefix` — dùng chung cho build DB và search; **`detect_supplier_prefixes()` + `load_supplier_prefixes()`** học tiền tố từ catalog (5.7) |
 | `bearing_codes.py` (mới) | Tách mã vòng bi (mã gốc + hậu tố), hậu tố tương đương, chấm điểm biến thể |
 | `build_crossref.py` (mới) | Học Norelem → Kipp series + brand model từ tập train |
 | `attribute_rules.py` (mới) | Học luật "từ trong query → thuộc tính sản phẩm" (đối chứng với biến thể, lift so với baseline, cận dưới Wilson) |
@@ -155,6 +156,10 @@ Hệ thống không cố gắng thay thế con người 100% (rất dễ gây h�
 
 **Dữ liệu:** 162.269 sản phẩm; **271.035 ảnh** (98.4% bearings, 99.9% standard parts có ảnh; pneumatics không có media); đã loại 11 file trùng lặp cũ (backup ở `_backup/`).
 
+**Bố cục thư mục (2026-09-20):** code tìm dữ liệu ở **gốc repo**, không phải trong thư mục tải về. Đúng layout là:
+`<repo>/catalogdata_bearings/`, `<repo>/catalogdata_standard_parts/`, `<repo>/customerinquiry/`, `<repo>/articledata_pneumatics/articledata_pneumatics.csv`.
+Nếu vừa giải nén bản tải về thì tất cả đang nằm lồng trong `articledata_pneumatics/` → phải chuyển lên gốc, nếu không `preprocess_json.py` báo "No JSON files found" và `build_crossref.py` crash vì danh sách inquiry rỗng. Các thư mục này đã được thêm vào `.gitignore` (commit `c20771c`).
+
 **Chạy lại:**
 ```bash
 python preprocess_json.py && python preprocess_csv.py && python clean_json.py
@@ -166,9 +171,35 @@ ABLATE=suffix_equivalents python run_pipeline.py 100   # tắt 1 luật viết t
 ```
 
 ### 5.6 Việc tiếp theo
-1.  ⚠️ **Ổn định code:** đang có thay đổi dở dang từ một phiên khác (`create_database.py` gọi `detect_supplier_prefixes` / `SUPPLIER_PREFIX_PATH` chưa tồn tại trong `normalization.py`). Chốt 1 người sửa trước khi chạy tiếp.
+1.  ✅ **Ổn định code:** đã xong (2026-09-20) — `detect_supplier_prefixes` / `SUPPLIER_PREFIX_PATH` đã được viết trong `normalization.py`, pipeline chạy thông tới `build_crossref.py`. Chi tiết ở 5.7.
 2.  **Ablation** từng luật viết tay (2 seed, không tốn API vì đã cache) → biết luật nào đáng giữ / chuyển sang cấu hình.
 3.  **Đánh giá có mục tiêu cho luật thuộc tính:** chỉ các query có từ khớp luật, bật/tắt `S_attr`.
 4.  **Cải thiện Manual Review:** chỉ 51% có đáp án trong Top-3 → tăng recall ứng viên (vd. biến thể `W`/`NR` bị cắt khỏi 25 ứng viên đầu).
 5.  Ý định "Alternative zu / baugleich / Ersatz für" → không auto-match.
 6.  Chạy 1000 mẫu để chốt số cho pitching; đo latency / query.
+
+---
+
+## 6. Tiền tố nhà cung cấp: từ luật viết tay sang học từ catalog (2026-09-20)
+
+**Vấn đề:** Boie gắn tiền tố nội bộ vào mã của một số nhà cung cấp (`2026219-2Z` thực ra là FAG `6219-2Z`). Trước đây ba nhà cung cấp này được **gõ tay** trong `normalization.py`, nên mỗi lần Boie thêm nhà cung cấp mới lại phải sửa code.
+
+**Cách phân biệt:** tiền tố nội bộ phủ gần như toàn bộ mã của một hãng, còn tiền tố series thật thì rải rác.
+
+| Hãng | Mã trong catalog | Tiền tố 3 ký tự phổ biến nhất | Kết luận |
+|---|---|---|---|
+| FAG | 13.550 | `202` = **96.7%** | tiền tố nội bộ |
+| GLYCO | 322 | `109` = **99.7%** | tiền tố nội bộ |
+| INA | 6.494 | `101` = **68.1%**, `102` = 10.5% | tiền tố nội bộ (cả hai) |
+| SKF | 16.792 | `620` = 4.0% | series thật → bỏ qua |
+| Ganter | 56.514 | `300` = 5.4% | series thật → bỏ qua |
+
+Ngưỡng: ≥ 100 mã mỗi hãng, tiền tố chính ≥ 50%, tiền tố phụ ≥ 5% (chỉ tính khi đã có tiền tố chính, để bắt được `102` của INA).
+
+**Kết quả:** học ra đúng `{FAG: [202], INA: [101, 102], GLYCO: [109]}` — **trùng khớp danh sách viết tay cũ**, nên hành vi hệ thống không đổi và không cần đo lại metrics. Kết quả tương tự khi chạy với dữ liệu đầy đủ (163.709 sản phẩm) lẫn khi mới giải nén một phần (73.159 sản phẩm).
+
+**Luồng hoạt động:** `create_database.py` gọi `detect_supplier_prefixes()` → ghi `preprocessed_data/supplier_prefixes.json` → những lần import sau, `normalization.py` tự nạp file này thay cho danh sách viết tay. Nếu thiếu file thì quay về danh sách viết tay, không có trạng thái hỏng. Cờ `ABLATE=supplier_prefix` vẫn hoạt động như cũ.
+
+**Bẫy đã gặp:** với ngưỡng 30 mã, hệ thống bắt nhầm `Fluid Concept` (59 mã đều bắt đầu bằng `200` — đó là cách đánh số riêng của họ) và sinh ra 8 alias trùng nhầm sản phẩm khác. Vì vậy ngưỡng được đặt ở 100.
+
+**Lưu ý cho người chạy lại:** chuỗi mô tả của `supplier_prefix` trong `feature_flags.py` vẫn ghi "(normalization.py)" theo nghĩa luật viết tay — chỉ là chú thích, không ảnh hưởng chạy.
