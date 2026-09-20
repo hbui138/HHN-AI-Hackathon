@@ -203,3 +203,68 @@ Ngưỡng: ≥ 100 mã mỗi hãng, tiền tố chính ≥ 50%, tiền tố ph�
 **Bẫy đã gặp:** với ngưỡng 30 mã, hệ thống bắt nhầm `Fluid Concept` (59 mã đều bắt đầu bằng `200` — đó là cách đánh số riêng của họ) và sinh ra 8 alias trùng nhầm sản phẩm khác. Vì vậy ngưỡng được đặt ở 100.
 
 **Lưu ý cho người chạy lại:** chuỗi mô tả của `supplier_prefix` trong `feature_flags.py` vẫn ghi "(normalization.py)" theo nghĩa luật viết tay — chỉ là chú thích, không ảnh hưởng chạy.
+
+---
+
+## 7. Giao diện demo (`src/app.py`, 2026-09-20)
+
+```bash
+streamlit run src/app.py
+```
+
+Hai chế độ, chọn ở sidebar:
+
+| Chế độ | Nguồn dữ liệu | Cần gì |
+|---|---|---|
+| **Results** | đọc `results/pipeline_results_*.json` | **chỉ cần `streamlit`** — chạy được trên laptop bất kỳ, dùng khi pitch |
+| **Live search** | gọi thẳng `llm_parser.parse_query` + `search_engine.hybrid_search` | model fine-tune, Chroma, `OPENROUTER_API_KEY` |
+
+`search_engine` được import **lazy** trong `load_engine()`, nên chế độ Results vẫn chạy trên máy không có torch. Model chỉ load một lần nhờ `@st.cache_resource`.
+
+### 7.1 Map dữ liệu → giao diện
+
+| Trường JSON | Hiển thị |
+|---|---|
+| `metrics.*` | 4 ô số lớn: Top-1, Top-3, Automation rate, Auto-match precision |
+| `metrics_by_category` | hàng số theo bearings / pneumatics / standard parts |
+| `routing` | viền **xanh** Auto-matched / viền **vàng** Manual review |
+| `query` | tiêu đề anfrage |
+| `parsed_query` | dòng "Extracted from the text — Manufacturer / Part_Number" |
+| `confidence_delta` | "Margin over rank 2" — giải thích vì sao được auto hay không |
+| `attribute_rules_fired` | chip các luật thuộc tính đã kích hoạt |
+| `predictions[].confidence` | số % lớn bên phải thẻ |
+| `predictions[].method` | tách thành 4 dòng lý do: Part number / Manufacturer / Description (cross-encoder) / Technical attributes |
+| `predictions[].product.images[0].url` | ảnh sản phẩm |
+| `predictions[].product.attributes` | dòng thông số |
+| `is_label` | ✅ / ✗ — **chỉ có ý nghĩa khi xem kết quả test**, không tồn tại ở chế độ live |
+
+Bộ lọc: All / Auto-matched / Manual review / Errors only, lọc theo warengruppe, và ô tìm trong nội dung anfrage.
+
+### 7.2 Cần để ý
+
+*   **Ngôn ngữ:** nhãn giao diện tiếng Anh; **nội dung sản phẩm và câu hỏi của khách giữ nguyên tiếng Đức** vì đó là dữ liệu thật của Boie. Đừng dịch, sẽ làm demo sai lệch.
+*   **`is_label` không có ở chế độ live.** Dấu ✅/✗ chỉ so với nhãn của tập test. Khi demo live đừng hứa hệ thống "biết" đáp án đúng.
+*   **64% sản phẩm có `link` rỗng**, nên nút "Open in shop" chỉ hiện ở một phần. 92% thẻ có ảnh; pneumatics **không có ảnh nào** (CSV không có media) → hiện chữ "no image".
+*   **Giá trị thuộc tính bị đệm 3 chữ số thập phân** (`8.000 mm`). UI tự rút gọn thành `8 mm` khi hiển thị; dữ liệu gốc vẫn vậy.
+*   **Bộ lọc "Errors only" trộn hai thứ rất khác nhau** — xem 7.3. Nên tách thành hai bộ lọc riêng trước khi demo.
+*   `run.input_file` trong file kết quả ghi đường dẫn kiểu Windows (`preprocessed_data\unseen_test_data.csv`) vì được chạy trên máy Windows. Không ảnh hưởng gì.
+
+### 7.3 Những gì nhìn ra được qua bộ lọc "Errors only" (seed 2026, 1000 mẫu)
+
+223 ca Top-1 sai, chia theo **khách có ghi mã hay không**:
+
+| Nhóm | Số ca | Top-1 đúng | Auto | Auto sai | Precision auto |
+|---|---|---|---|---|---|
+| **A.** khách ghi **đúng mã nhãn**, hệ thống vẫn trượt | 477 | 95% | 392 | 3 | **99.2%** |
+| **B.** khách ghi mã sp được chọn, nhãn là biến thể khác | 29 | 0% | 12 | 12 | 0% |
+| **C.** khách không ghi mã khớp nào | 494 | 65% | 200 | 10 | 95.0% |
+
+Ba điều rút ra:
+
+1.  **176/223 ca sai có nhãn nằm ngoài Top-3** → là bài toán *recall*, không phải bài toán xếp hạng. Hiển thị thêm lựa chọn không cứu được.
+2.  **Nhóm A còn 22 ca lỗi khó biện minh**: khách gõ đúng mã mà hệ thống chọn biến thể dài hơn. Mẫu lặp rõ nhất: `6006-2Z` (5 lần) → chọn `W 6006-2Z`. Đúng hồi quy đã ghi ở 5.3 do alias bỏ tiền tố chữ. Luật "ưu tiên mã khớp chính xác, chỉ tính cụm dài nhất trong câu" đo trên Top-3 có sẵn: **sửa 4, hỏng 0** (cận dưới, vì chạy thật còn kéo thêm được ứng viên ngoài Top-3).
+3.  **Confidence không tách được nhóm C**: trung vị nhóm C là 0.91, 260/494 ca ≥0.90 — gần bằng nhóm A. Và **cả 10 ca C auto sai đều đến từ method `Code`**, không phải Semantic (0 ca auto-match nào thuần semantic). Nghĩa là rò rỉ nằm ở chỗ `S_code` tính **khớp mờ ngang với khớp chính xác**, chứ không nằm ở ngưỡng routing.
+
+Ý tưởng đang cân nhắc — **routing theo loại bằng chứng** thay vì theo điểm số: khớp chính xác → auto; nhiều biến thể cùng mã gốc khớp chính xác → hỏi khách; chỉ khớp mờ hoặc chỉ có mô tả → nhân viên kiểm. Đo thô: cấm hoàn toàn nhóm C auto-match thì automation 60.4% → 39.2%, precision lên ~99%. Cần đo thêm mức trung gian (C vẫn auto nhưng ngưỡng 0.94–0.96) trước khi quyết.
+
+⚠️ Phương án "đưa mọi ứng viên ≥90% cho khách chọn" **đã đo và không nên làm ở dạng thô**: kích hoạt ở 289/1000 anfrage, cứu được 5 ca auto sai nhưng biến 191 ca đang đúng thành câu hỏi thừa (automation 60.4% → 41.0%). Lý do: hầu như mã vòng bi nào cũng có họ biến thể `-Z`/`/C3`/`N`/`NR` cùng đạt trên 90%, nên điều kiện này bắn vào ca bình thường. Chỉ đáng làm khi kết hợp: *không có ứng viên nào khớp chính xác* **và** có nhiều biến thể cùng mã gốc.
